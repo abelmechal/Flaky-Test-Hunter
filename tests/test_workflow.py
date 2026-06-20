@@ -7,7 +7,7 @@ from unittest.mock import patch
 from app.browserbase_runner import _execute_step
 from app.contracts import ReproPlan, ReproResult
 from app.reasoning import classify_failure
-from app.redis_store import RedisStore
+from app.redis_store import SEEDED_HISTORY, RedisStore
 from app.repro_client import (
     get_repro_runner,
     run_mock_repro_plan,
@@ -73,6 +73,15 @@ class ContractTests(unittest.TestCase):
 
 
 class WorkflowTests(unittest.TestCase):
+    def test_demo_history_is_seeded_with_mixed_outcomes(self):
+        store = RedisStore()
+        history = store.seed_history("sentry-checkout-001")
+        self.assertEqual(history, SEEDED_HISTORY)
+        self.assertEqual(
+            [item["reproduced"] for item in history],
+            [True, False, True],
+        )
+
     def test_fixture_integration_flow(self):
         store = RedisStore()
         sentry = SentryClient()
@@ -156,6 +165,30 @@ class WorkflowTests(unittest.TestCase):
             "click",
             "wait_for_selector",
         ])
+
+    def test_live_browserbase_diagnosis_wording(self):
+        plan = SentryClient().fetch_repro_plan()
+        result = ReproResult(
+            issue_id=plan.issue_id,
+            reproduced=True,
+            duration_ms=6200,
+            screenshot_url="artifacts/screenshots/demo.png",
+            error_observed="TimeoutError: timeout exceeded",
+            notes="Browserbase reproduced a failure at step 4 of 4.",
+        )
+        from app.reasoning import format_diagnosis
+
+        message = format_diagnosis(
+            plan,
+            result,
+            SEEDED_HISTORY,
+            verification_source="browserbase",
+        )
+        self.assertIn(
+            "Browserbase reproduced a failure at step 4 of 4.",
+            message,
+        )
+        self.assertIn("Temporarily quarantine this test", message)
 
 
 if __name__ == "__main__":

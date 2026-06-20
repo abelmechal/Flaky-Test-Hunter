@@ -25,14 +25,24 @@ def format_diagnosis(
     verification_source: str,
 ) -> str:
     classification = classify_failure(history)
-    browser_outcome = "failed" if result.reproduced else "passed"
-    source_label = (
-        "Browserbase"
-        if verification_source == "browserbase"
-        else verification_source.capitalize()
-    )
+    if verification_source == "browserbase":
+        browser_summary = (
+            result.notes
+            if result.notes
+            else (
+                "Browserbase reproduced the expected failure."
+                if result.reproduced
+                else "Browserbase completed the plan without reproducing the failure."
+            )
+        )
+    else:
+        browser_outcome = "failed" if result.reproduced else "passed"
+        browser_summary = (
+            f"Latest run {browser_outcome} in {verification_source.capitalize()}."
+        )
     history_summary = (
-        "Recent runs show mixed pass/fail behavior."
+        "Recent runs show mixed pass/fail behavior. This is likely flaky because "
+        "the same issue has both pass and fail outcomes across recent runs."
         if is_flaky(history)
         else "Recent runs do not yet show mixed pass/fail behavior."
     )
@@ -45,9 +55,9 @@ def format_diagnosis(
         f"Diagnosis: {classification}\n\n"
         f"Sentry issue:\n{plan.test_name}\n\n"
         f"Observed failure:\n{plan.expected_failure}\n\n"
-        f"Browser verification:\nLatest run {browser_outcome} in {source_label}.\n\n"
+        f"Browser verification:\n{browser_summary}\n\n"
         f"History:\n{history_summary}\n\n"
         f"Conclusion:\n{conclusion}\n\n"
-        "Recommendation:\nTemporarily quarantine the test and investigate "
+        "Recommendation:\nTemporarily quarantine this test and investigate "
         "async timing around #order-confirmation."
     )
