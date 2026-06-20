@@ -5,6 +5,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from app.browserbase_runner import _execute_step
+from app.a2a_contracts import A2AReproRequest, A2AReproResponse
 from app.contracts import ReproPlan, ReproResult
 from app.reasoning import classify_failure
 from app.redis_store import SEEDED_HISTORY, RedisStore
@@ -70,6 +71,24 @@ class ContractTests(unittest.TestCase):
             mode="json", exclude_none=True
         )
         self.assertEqual(actual, expected)
+
+    def test_a2a_request_response_contracts_validate(self):
+        request = A2AReproRequest.model_validate_json(
+            (ROOT / "contracts" / "a2a_repro_request.example.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        response = A2AReproResponse.model_validate_json(
+            (ROOT / "contracts" / "a2a_repro_response.example.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertEqual(request.type, "repro_request")
+        self.assertTrue(request.conversation_id)
+        self.assertEqual(request.plan.issue_id, "sentry-checkout-001")
+        self.assertEqual(response.type, "repro_response")
+        self.assertEqual(response.conversation_id, request.conversation_id)
+        self.assertEqual(response.result.issue_id, request.plan.issue_id)
 
 
 class WorkflowTests(unittest.TestCase):
@@ -189,6 +208,29 @@ class WorkflowTests(unittest.TestCase):
             message,
         )
         self.assertIn("Temporarily quarantine this test", message)
+
+
+class MultiAgentFallbackTests(unittest.IsolatedAsyncioTestCase):
+    async def test_missing_reproducer_address_falls_back_locally(self):
+        environment = {
+            key: value
+            for key, value in os.environ.items()
+            if key != "REPRODUCER_AGENT_ADDRESS"
+        }
+        environment.update(
+            {
+                "MULTI_AGENT_MODE": "true",
+                "REPRO_MODE": "mock",
+            }
+        )
+        with patch.dict(os.environ, environment, clear=True):
+            message = await FlakyTestWorkflow(store=RedisStore()).diagnose_async(
+                None,
+                chat_session_id="missing-reproducer-test",
+            )
+
+        self.assertIn("Diagnosis: Likely flaky", message)
+        self.assertIn("Reproducer Agent was unavailable", message)
 
 
 if __name__ == "__main__":

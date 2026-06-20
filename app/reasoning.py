@@ -23,6 +23,7 @@ def format_diagnosis(
     result: ReproResult,
     history: list[dict[str, Any]],
     verification_source: str,
+    verification_path: str | None = None,
 ) -> str:
     classification = classify_failure(history)
     if verification_source == "browserbase":
@@ -53,6 +54,12 @@ def format_diagnosis(
     )
     return (
         f"Diagnosis: {classification}\n\n"
+        + (
+            f"Verification path:\n{verification_path}\n\n"
+            if verification_path
+            else ""
+        )
+        +
         f"Sentry issue:\n{plan.test_name}\n\n"
         f"Observed failure:\n{plan.expected_failure}\n\n"
         f"Browser verification:\n{browser_summary}\n\n"

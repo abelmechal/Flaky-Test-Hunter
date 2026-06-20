@@ -1,0 +1,33 @@
+{
+  "type": "repro_request",
+  "conversation_id": "demo-checkout-001",
+  "reply_to": "diagnostician-agent-address",
+  "plan": {
+    "issue_id": "sentry-checkout-001",
+    "test_name": "checkout_flow.spec.ts > completes purchase",
+    "url": "data:text/html,<html><body><h1>Checkout Demo</h1><input id=\"email\"/><button id=\"submit-payment\">Submit payment</button></body></html>",
+    "steps": [
+      {
+        "action": "goto",
+        "target": "data:text/html,<html><body><h1>Checkout Demo</h1><input id=\"email\"/><button id=\"submit-payment\">Submit payment</button></body></html>"
+      },
+      {
+        "action": "fill",
+        "target": "#email",
+        "value": "test@example.com"
+      },
+      {
+        "action": "click",
+        "target": "#submit-payment"
+      },
+      {
+        "action": "wait_for_selector",
+        "target": "#order-confirmation",
+        "timeout_ms": 5000
+      }
+    ],
+    "expected_failure": "Element #order-confirmation not visible within 5000ms",
+    "run_count_recent": 14,
+    "first_seen": "2026-06-20T10:00:00Z"
+  }
+}

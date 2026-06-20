@@ -51,7 +51,7 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
     ctx.logger.info("Received chat message from %s: %s", sender, user_text)
 
     try:
-        response = workflow.diagnose(chat_session_id=sender)
+        response = await workflow.diagnose_async(ctx, chat_session_id=sender)
     except Exception:
         ctx.logger.exception("Failed to diagnose seeded Sentry issue")
         response = (
