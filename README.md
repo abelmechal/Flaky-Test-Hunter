@@ -27,6 +27,9 @@ python agent.py
 ```
 
 Copy `.env.example` to `.env` and replace `AGENT_SEED` before a public demo.
+Keep `REPRO_MODE=mock` for local development. Set it to `browserbase` when
+`app/browserbase_runner.py` is available. `REPRO_FALLBACK_TO_MOCK=true` keeps
+the demo operational if the Browserbase runner fails.
 
 ## Integration contracts
 
@@ -36,6 +39,13 @@ Copy `.env.example` to `.env` and replace `AGENT_SEED` before a public demo.
 The Browserbase runner should accept the input contract and return the output
 contract. Its initial supported actions are `goto`, `fill`, `click`, and
 `wait_for_selector`.
+
+Both implementations expose the same interface:
+
+```python
+def run_repro_plan(plan: dict) -> dict:
+    ...
+```
 
 ## Redis keys
 

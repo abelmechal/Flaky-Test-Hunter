@@ -10,37 +10,44 @@ def is_flaky(history: list[dict[str, Any]]) -> bool:
     return outcomes == {False, True}
 
 
+def classify_failure(history: list[dict[str, Any]]) -> str:
+    if is_flaky(history):
+        return "Likely flaky"
+    if history and all(bool(item["reproduced"]) for item in history):
+        return "Likely regression"
+    return "Inconclusive"
+
+
 def format_diagnosis(
     plan: ReproPlan,
     result: ReproResult,
     history: list[dict[str, Any]],
+    verification_source: str,
 ) -> str:
-    action_labels = {
-        "goto": "goto checkout page",
-        "fill": "fill email",
-        "click": "click submit payment",
-        "wait_for_selector": "wait for order confirmation",
-    }
-    steps = "\n".join(
-        f"{index}. {action_labels.get(step.action, step.action)}"
-        for index, step in enumerate(plan.steps, start=1)
+    classification = classify_failure(history)
+    browser_outcome = "failed" if result.reproduced else "passed"
+    source_label = (
+        "Browserbase"
+        if verification_source == "browserbase"
+        else verification_source.capitalize()
     )
-    history_note = (
-        "The history has both pass and fail outcomes, so this looks flaky."
+    history_summary = (
+        "Recent runs show mixed pass/fail behavior."
         if is_flaky(history)
-        else "The current history does not yet show mixed pass and fail outcomes."
+        else "Recent runs do not yet show mixed pass/fail behavior."
     )
-    repro_note = (
-        "The mocked browser run reproduced the expected failure."
-        if result.reproduced
-        else "The mocked browser run did not reproduce the expected failure."
+    conclusion = (
+        "This is likely flaky, not a deterministic regression."
+        if classification == "Likely flaky"
+        else "The available evidence does not yet prove intermittent behavior."
     )
     return (
-        f"I found the Sentry issue for {plan.test_name}.\n\n"
-        f"Failure:\n{plan.expected_failure}\n\n"
-        f"Recent failures:\n{plan.run_count_recent}\n\n"
-        f"I created a browser reproduction plan with {len(plan.steps)} steps:\n"
-        f"{steps}\n\n"
-        f"{history_note}\n{repro_note}\n\n"
-        "Next step: send this plan to Browserbase for live verification."
+        f"Diagnosis: {classification}\n\n"
+        f"Sentry issue:\n{plan.test_name}\n\n"
+        f"Observed failure:\n{plan.expected_failure}\n\n"
+        f"Browser verification:\nLatest run {browser_outcome} in {source_label}.\n\n"
+        f"History:\n{history_summary}\n\n"
+        f"Conclusion:\n{conclusion}\n\n"
+        "Recommendation:\nTemporarily quarantine the test and investigate "
+        "async timing around #order-confirmation."
     )

@@ -67,6 +67,13 @@ class RedisStore:
         raw = self._get(self.history_key(issue_id))
         return json.loads(raw) if raw else []
 
+    def get_status(self, issue_id: str) -> str | None:
+        return self._get(self.status_key(issue_id))
+
+    def get_session_context(self, chat_session_id: str) -> dict[str, Any] | None:
+        raw = self._get(self.session_key(chat_session_id))
+        return json.loads(raw) if raw else None
+
     def save_history(self, issue_id: str, history: list[dict[str, Any]]) -> None:
         self._set(self.history_key(issue_id), json.dumps(history))
 
