@@ -1,0 +1,35 @@
+{
+  "id": "sentry-checkout-001",
+  "title": "TimeoutError: checkout confirmation not visible",
+  "culprit": "checkout_flow.spec.ts > completes purchase",
+  "extra": {
+    "repro_plan": {
+      "issue_id": "sentry-checkout-001",
+      "test_name": "checkout_flow.spec.ts > completes purchase",
+      "url": "https://example.com/checkout",
+      "steps": [
+        {
+          "action": "goto",
+          "target": "https://example.com/checkout"
+        },
+        {
+          "action": "fill",
+          "target": "#email",
+          "value": "test@example.com"
+        },
+        {
+          "action": "click",
+          "target": "#submit-payment"
+        },
+        {
+          "action": "wait_for_selector",
+          "target": "#order-confirmation",
+          "timeout_ms": 5000
+        }
+      ],
+      "expected_failure": "Element #order-confirmation not visible within 5000ms",
+      "run_count_recent": 14,
+      "first_seen": "2026-06-20T10:00:00Z"
+    }
+  }
+}

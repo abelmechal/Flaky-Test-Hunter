@@ -12,6 +12,8 @@ from uagents_core.contrib.protocols.chat import (
     chat_protocol_spec,
 )
 
+from app.workflow import FlakyTestWorkflow
+
 load_dotenv()
 
 AGENT_SEED = os.getenv(
@@ -30,6 +32,7 @@ agent = Agent(
 )
 
 protocol = Protocol(spec=chat_protocol_spec)
+workflow = FlakyTestWorkflow()
 
 
 @protocol.on_message(ChatMessage)
@@ -47,14 +50,14 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
     )
     ctx.logger.info("Received chat message from %s: %s", sender, user_text)
 
-    response = (
-        "✅ Flaky-Test Hunter is online.\n\n"
-        "I can receive messages through ASI:One / Agentverse and reply from "
-        "the uAgent.\n\n"
-        "Current milestone: platform proof with a hardcoded response.\n"
-        "Next milestone: connect Sentry, Redis, and Browserbase.\n\n"
-        f"You said: {user_text}"
-    )
+    try:
+        response = workflow.diagnose(chat_session_id=sender)
+    except Exception:
+        ctx.logger.exception("Failed to diagnose seeded Sentry issue")
+        response = (
+            "I could not parse the seeded Sentry issue into a reproduction plan. "
+            "Check the local fixture and contract files."
+        )
 
     await ctx.send(
         sender,

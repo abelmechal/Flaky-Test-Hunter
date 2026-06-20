@@ -1,0 +1,8 @@
+{
+  "issue_id": "sentry-checkout-001",
+  "reproduced": true,
+  "duration_ms": 4210,
+  "screenshot_url": "https://example.com/screenshot.png",
+  "error_observed": "TimeoutError: #order-confirmation not found",
+  "notes": "Failed while waiting for #order-confirmation"
+}
