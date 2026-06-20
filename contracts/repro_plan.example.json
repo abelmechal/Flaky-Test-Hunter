@@ -1,11 +1,11 @@
 {
   "issue_id": "sentry-checkout-001",
   "test_name": "checkout_flow.spec.ts > completes purchase",
-  "url": "https://example.com/checkout",
+  "url": "data:text/html,<html><body><h1>Checkout Demo</h1><input id=\"email\" placeholder=\"email\"/><button id=\"submit-payment\" onclick=\"document.body.insertAdjacentHTML('beforeend','<p id=processing>Processing payment...</p>')\">Submit payment</button></body></html>",
   "steps": [
     {
       "action": "goto",
-      "target": "https://example.com/checkout"
+      "target": "data:text/html,<html><body><h1>Checkout Demo</h1><input id=\"email\" placeholder=\"email\"/><button id=\"submit-payment\" onclick=\"document.body.insertAdjacentHTML('beforeend','<p id=processing>Processing payment...</p>')\">Submit payment</button></body></html>"
     },
     {
       "action": "fill",

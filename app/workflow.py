@@ -6,7 +6,7 @@ from typing import Any
 from app.contracts import ReproResult
 from app.reasoning import format_diagnosis
 from app.redis_store import RedisStore
-from app.repro_client import ReproRunner, get_repro_runner, run_repro_plan
+from app.repro_client import ReproRunner, run_repro_plan
 from app.sentry_client import SentryClient
 
 
@@ -20,19 +20,7 @@ class FlakyTestWorkflow:
         self.sentry = sentry or SentryClient()
         self.repro_mode = os.getenv("REPRO_MODE", "mock").lower()
         self.verification_source = self.repro_mode
-        if repro_runner is not None:
-            self.repro_runner = repro_runner
-        else:
-            try:
-                self.repro_runner = get_repro_runner(self.repro_mode)
-            except (ImportError, AttributeError):
-                if (
-                    self.repro_mode != "browserbase"
-                    or os.getenv("REPRO_FALLBACK_TO_MOCK", "true").lower() != "true"
-                ):
-                    raise
-                self.repro_runner = run_repro_plan
-                self.verification_source = "mock fallback"
+        self.repro_runner = repro_runner or run_repro_plan
         self.store = store or RedisStore()
 
     def diagnose(self, chat_session_id: str) -> str:
@@ -42,14 +30,10 @@ class FlakyTestWorkflow:
         try:
             result_data = self.repro_runner(plan_data)
             verification_source = self.verification_source
+            if result_data.get("browserbase_error"):
+                verification_source = "mock fallback"
         except Exception:
-            if (
-                self.repro_mode != "browserbase"
-                or os.getenv("REPRO_FALLBACK_TO_MOCK", "true").lower() != "true"
-            ):
-                raise
-            result_data = run_repro_plan(plan_data)
-            verification_source = "mock fallback"
+            raise
         result = ReproResult.model_validate(result_data)
         self.store.record_result(plan.issue_id, result.reproduced)
         updated_history = self.store.get_history(plan.issue_id)

@@ -1,16 +1,49 @@
 import json
+import os
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
+from app.browserbase_runner import _execute_step
 from app.contracts import ReproPlan, ReproResult
 from app.reasoning import classify_failure
 from app.redis_store import RedisStore
-from app.repro_client import get_repro_runner, run_repro_plan
+from app.repro_client import (
+    get_repro_runner,
+    run_mock_repro_plan,
+    run_repro_plan,
+)
 from app.sentry_client import SentryClient
 from app.workflow import FlakyTestWorkflow
 
 
 ROOT = Path(__file__).resolve().parent.parent
+
+
+class FakeLocator:
+    def __init__(self, calls, target):
+        self.calls = calls
+        self.target = target
+
+    def fill(self, value, timeout):
+        self.calls.append(("fill", self.target, value, timeout))
+
+    def click(self, timeout):
+        self.calls.append(("click", self.target, timeout))
+
+
+class FakePage:
+    def __init__(self):
+        self.calls = []
+
+    def goto(self, target, wait_until, timeout):
+        self.calls.append(("goto", target, wait_until, timeout))
+
+    def locator(self, target):
+        return FakeLocator(self.calls, target)
+
+    def wait_for_selector(self, target, state, timeout):
+        self.calls.append(("wait_for_selector", target, state, timeout))
 
 
 class ContractTests(unittest.TestCase):
@@ -57,7 +90,7 @@ class WorkflowTests(unittest.TestCase):
 
         message = FlakyTestWorkflow(
             sentry=sentry,
-            repro_runner=run_repro_plan,
+            repro_runner=run_mock_repro_plan,
             store=store,
         ).diagnose("test-session")
         context = store.get_session_context("test-session")
@@ -77,6 +110,52 @@ class WorkflowTests(unittest.TestCase):
         result = runner(plan)
         self.assertIsInstance(result, dict)
         self.assertTrue(result["reproduced"])
+
+    def test_browserbase_mode_falls_back_without_api_key(self):
+        plan = SentryClient().fetch_repro_plan().model_dump(
+            mode="json", exclude_none=True
+        )
+        environment = {
+            key: value
+            for key, value in os.environ.items()
+            if key != "BROWSERBASE_API_KEY"
+        }
+        environment["REPRO_MODE"] = "browserbase"
+        with patch.dict(os.environ, environment, clear=True):
+            result = run_repro_plan(plan)
+
+        self.assertTrue(result["reproduced"])
+        self.assertIn("mock fallback was used", result["notes"])
+        self.assertTrue(
+            result["browserbase_error"].startswith("BrowserbaseRunnerError")
+        )
+
+    def test_browserbase_step_executor_supports_frozen_actions(self):
+        page = FakePage()
+        _execute_step(
+            page,
+            {"action": "goto", "target": "data:text/html,<p>demo</p>"},
+        )
+        _execute_step(
+            page,
+            {"action": "fill", "target": "#email", "value": "test@example.com"},
+        )
+        _execute_step(page, {"action": "click", "target": "#submit-payment"})
+        _execute_step(
+            page,
+            {
+                "action": "wait_for_selector",
+                "target": "#order-confirmation",
+                "timeout_ms": 5000,
+            },
+        )
+
+        self.assertEqual([call[0] for call in page.calls], [
+            "goto",
+            "fill",
+            "click",
+            "wait_for_selector",
+        ])
 
 
 if __name__ == "__main__":

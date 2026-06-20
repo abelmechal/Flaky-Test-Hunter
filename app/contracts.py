@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, Field, HttpUrl, model_validator
+from pydantic import BaseModel, Field, model_validator
 
 
 class ReproStep(BaseModel):
@@ -21,7 +21,7 @@ class ReproStep(BaseModel):
 class ReproPlan(BaseModel):
     issue_id: str = Field(min_length=1)
     test_name: str = Field(min_length=1)
-    url: HttpUrl
+    url: str = Field(min_length=1)
     steps: list[ReproStep] = Field(min_length=1)
     expected_failure: str = Field(min_length=1)
     run_count_recent: int = Field(ge=0)
@@ -32,6 +32,6 @@ class ReproResult(BaseModel):
     issue_id: str = Field(min_length=1)
     reproduced: bool
     duration_ms: int = Field(ge=0)
-    screenshot_url: HttpUrl | None = None
+    screenshot_url: str | None = None
     error_observed: str | None = None
     notes: str | None = None

@@ -31,6 +31,24 @@ Keep `REPRO_MODE=mock` for local development. Set it to `browserbase` when
 `app/browserbase_runner.py` is available. `REPRO_FALLBACK_TO_MOCK=true` keeps
 the demo operational if the Browserbase runner fails.
 
+Install the browser runtime once:
+
+```powershell
+pip install -r requirements.txt
+playwright install chromium
+```
+
+Then run the deterministic fixture:
+
+```powershell
+$env:REPRO_MODE = "mock"
+python scripts/run_browserbase_fixture.py
+
+$env:REPRO_MODE = "browserbase"
+$env:BROWSERBASE_API_KEY = "your-key"
+python scripts/run_browserbase_fixture.py
+```
+
 ## Integration contracts
 
 - Input: `contracts/repro_plan.example.json`

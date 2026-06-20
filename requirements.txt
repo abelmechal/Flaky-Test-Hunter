@@ -1,3 +1,5 @@
+browserbase
+playwright
 python-dotenv
 redis
 uagents[all]
