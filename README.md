@@ -25,6 +25,10 @@ history, and classifies the failure as flaky or a likely regression.
 | `BROWSERBASE_STEP_TIMEOUT_MS` | `8000` | Default browser step timeout |
 | `BROWSERBASE_SESSION_TIMEOUT_SECONDS` | `300` | Browserbase session timeout |
 | `SCREENSHOT_DIR` | `artifacts/screenshots` | Local screenshot output |
+| `MULTI_AGENT_MODE` | `false` | Delegates repro work to the Reproducer Agent |
+| `REPRODUCER_AGENT_ADDRESS` | unset | Reproducer uAgent address |
+| `REPRODUCER_AGENT_ENDPOINT` | local port 8002 | Optional direct endpoint for smoke tests |
+| `A2A_REPRO_TIMEOUT_SECONDS` | `30` | Delegation timeout before local fallback |
 
 Copy `.env.example` to `.env`. Never commit real credentials.
 
@@ -133,3 +137,67 @@ def run_repro_plan(plan: dict) -> dict:
 - Add authenticated staging-app support and secret management.
 - Expand browser actions only after the MVP contract is stable.
 - Add richer retry statistics, confidence scoring, and CI-provider links.
+
+## Multi-Agent Upgrade
+
+The MVP can run in two modes:
+
+Single-agent mode:
+
+```text
+ASI:One → Flaky-Test Hunter → Sentry/Redis/Browserbase
+```
+
+Multi-agent mode:
+
+```text
+ASI:One → Diagnostician Agent → Reproducer Agent → Browserbase
+```
+
+The Diagnostician Agent owns Sentry parsing, Redis history,
+flaky-versus-regression reasoning, and the final explanation.
+
+The Reproducer Agent owns live browser verification. It accepts a Repro Plan
+JSON message over the Chat Protocol and returns a Repro Result JSON message.
+Example envelopes are frozen in:
+
+- `contracts/a2a_repro_request.example.json`
+- `contracts/a2a_repro_response.example.json`
+
+Enable the upgrade with:
+
+```text
+MULTI_AGENT_MODE=true
+REPRODUCER_AGENT_ADDRESS=<agent address>
+```
+
+If the Reproducer Agent is missing, times out, or returns an invalid response,
+the Diagnostician falls back to the existing local `run_repro_plan` path.
+
+Run the two-agent demo:
+
+Terminal 1:
+
+```powershell
+$env:BROWSERBASE_API_KEY = "your-key"
+$env:REPRO_MODE = "browserbase"
+python agents/reproducer_agent.py
+```
+
+Terminal 2:
+
+```powershell
+$env:MULTI_AGENT_MODE = "true"
+$env:REPRO_MODE = "browserbase"
+$env:REPRODUCER_AGENT_ADDRESS = "agent1..."
+python agent.py
+```
+
+Standalone smoke request:
+
+```powershell
+$env:MULTI_AGENT_MODE = "true"
+$env:REPRODUCER_AGENT_ADDRESS = "agent1..."
+$env:REPRODUCER_AGENT_ENDPOINT = "http://127.0.0.1:8002/submit"
+python scripts/run_multi_agent_demo_fixture.py
+```

@@ -1,0 +1,12 @@
+{
+  "type": "repro_response",
+  "conversation_id": "demo-checkout-001",
+  "result": {
+    "issue_id": "sentry-checkout-001",
+    "reproduced": true,
+    "duration_ms": 5210,
+    "screenshot_url": "artifacts/screenshots/sentry-checkout-001.png",
+    "error_observed": "TimeoutError: #order-confirmation not found",
+    "notes": "Browserbase reproduced a failure at step 4 of 4."
+  }
+}

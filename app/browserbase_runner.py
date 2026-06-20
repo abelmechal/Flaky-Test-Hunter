@@ -124,7 +124,7 @@ def run_repro_plan(plan: dict[str, Any]) -> dict[str, Any]:
         from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
         from playwright.sync_api import sync_playwright
 
-        browserbase = Browserbase(api_key=api_key)
+        browserbase = Browserbase(api_key=api_key, max_retries=0)
         create_kwargs: dict[str, Any] = {
             "api_timeout": int(
                 os.getenv("BROWSERBASE_SESSION_TIMEOUT_SECONDS", "300")
