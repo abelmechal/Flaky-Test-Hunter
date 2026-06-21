@@ -49,7 +49,17 @@ The full diagnosis is produced with one command.
 
 ### Visual Demo UI
 
-For the judge-facing dashboard, keep the Reproducer Agent running and launch:
+The public home page is an integrated Northstar upload application:
+
+1. Start an upload and watch it stall at 82%.
+2. Click **Run diagnosis** in the left sidebar.
+3. Watch the Diagnostician and Reproducer agents produce the report.
+4. Click **Apply suggested fix**.
+5. Retry the upload and verify it reaches 100%.
+
+The original multi-scenario dashboard remains available at `/triage.html`.
+
+For the local demo, keep the Reproducer Agent running and launch:
 
 ```powershell
 $env:MULTI_AGENT_MODE = "true"

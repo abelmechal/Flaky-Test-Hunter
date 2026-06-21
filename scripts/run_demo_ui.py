@@ -64,6 +64,9 @@ class DemoHandler(BaseHTTPRequestHandler):
             self._file(candidate)
             return
         if route == "/":
+            self._file(UI_DIR / "northstar.html")
+            return
+        if route == "/triage.html":
             self._file(UI_DIR / "index.html")
             return
         candidate = (UI_DIR / route.lstrip("/")).resolve()

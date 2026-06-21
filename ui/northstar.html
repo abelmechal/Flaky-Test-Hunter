@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Northstar · Upload diagnostics</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/northstar.css" />
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark"></span><strong>Northstar</strong></div>
+      <nav>
+        <button><span>⌂</span>Overview</button>
+        <button><span>▧</span>Media library</button>
+        <button class="active"><span>↑</span>Upload asset</button>
+        <button><span>◇</span>Collections</button>
+      </nav>
+      <div class="diagnosis-nav">
+        <div class="nav-label">Developer tools</div>
+        <button id="diagnoseButton" class="diagnose-button">
+          <span class="agent-symbol">✦</span>
+          <span><strong>Run diagnosis</strong><small>Investigate this failure</small></span>
+          <i id="failureDot"></i>
+        </button>
+        <a href="/triage.html">Open test triage ↗</a>
+      </div>
+      <div class="environment"><span></span><div><strong>Test environment</strong><small>Build 2026.06.20 · US West</small></div></div>
+    </aside>
+
+    <main>
+      <header>
+        <div><span>Media</span><b>/</b><strong>New asset</strong></div>
+        <div class="header-right"><span class="system-online"><i></i>Systems online</span><span class="avatar">AM</span></div>
+      </header>
+
+      <section class="workspace">
+        <div class="page-title">
+          <div><span class="eyebrow">Media pipeline</span><h1>Upload a new asset</h1><p>Files are processed and optimized automatically.</p></div>
+          <span class="build-pill" id="buildPill">Buggy build</span>
+        </div>
+
+        <article class="upload-card">
+          <div class="upload-grid">
+            <label>File name<input id="filename" value="product-demo.mp4" /></label>
+            <label>Collection<input value="Product launches" /></label>
+          </div>
+          <div class="drop-zone">
+            <div class="file-icon">MP4</div>
+            <div><strong>product-demo.mp4</strong><span>128.4 MB · H.264 video</span></div>
+            <span class="ready">Ready</span>
+          </div>
+          <button id="uploadButton" class="primary-button">Start upload</button>
+
+          <div class="upload-state hidden" id="uploadState">
+            <div class="upload-state-head"><div><span class="spinner" id="stateIcon"></span><strong id="uploadTitle">Uploading asset…</strong></div><b id="percentText">0%</b></div>
+            <div class="progress-track"><span id="progressBar"></span></div>
+            <p id="uploadDetail">Sending file to the media worker.</p>
+          </div>
+
+          <div class="error-state hidden" id="errorState">
+            <span class="error-icon">!</span>
+            <div><strong>Upload stalled at 82%</strong><p>The completion event was never received from the media worker.</p></div>
+            <button id="errorDiagnose">Diagnose failure</button>
+          </div>
+
+          <div class="success-state hidden" id="successState">
+            <span>✓</span><div><strong id="upload-complete">Upload complete</strong><p>product-demo.mp4 is ready in Product launches.</p></div>
+          </div>
+        </article>
+
+        <section class="activity">
+          <div class="section-heading"><div><span class="eyebrow">Recent activity</span><h2>Media processing</h2></div><span>Last 24 hours</span></div>
+          <div class="activity-row"><span class="file-chip">PNG</span><div><strong>homepage-hero.png</strong><small>Optimized successfully</small></div><b class="success-text">Complete</b></div>
+          <div class="activity-row"><span class="file-chip video">MP4</span><div><strong>launch-teaser.mp4</strong><small>Processing completed</small></div><b class="success-text">Complete</b></div>
+        </section>
+      </section>
+    </main>
+
+    <div class="diagnosis-overlay hidden" id="diagnosisOverlay">
+      <section class="diagnosis-panel">
+        <div class="panel-header"><div><span class="agent-symbol">✦</span><div><span class="eyebrow">Flaky-Test Hunter</span><h2>Live diagnosis</h2></div></div><button id="closeDiagnosis">×</button></div>
+
+        <div class="agent-flow">
+          <article id="diagnosticianAgent"><span class="agent-avatar purple">D</span><div><small>Agent 01</small><strong>Diagnostician</strong><p>Waiting for failure context</p></div><i>Ready</i></article>
+          <span class="flow-line"></span>
+          <article id="reproducerAgent"><span class="agent-avatar green">R</span><div><small>Agent 02</small><strong>Reproducer</strong><p>Waiting for repro plan</p></div><i>Ready</i></article>
+        </div>
+
+        <div class="diagnosis-progress" id="diagnosisProgress">
+          <div><span class="pulse"></span><strong id="diagnosisStep">Reading upload failure</strong><b id="diagnosisPercent">10%</b></div>
+          <div class="diagnosis-track"><span id="diagnosisBar"></span></div>
+        </div>
+
+        <div class="report hidden" id="report">
+          <div class="report-top"><span>Final diagnosis</span><strong id="classification">LIKELY FLAKY</strong><b id="confidence">89% confidence</b></div>
+          <div class="evidence">
+            <div><span>Observed error</span><code>Upload completion state not visible within 5000ms</code></div>
+            <div><span>Browser verification</span><strong id="browserEvidence">Failure reproduced at step 4 of 4</strong></div>
+            <div><span>History</span><strong>Mixed pass/fail outcomes across recent runs</strong></div>
+          </div>
+          <div class="root-cause"><span>Probable root cause</span><strong>Race condition: the test waits on a UI timeout instead of the media worker's completion event.</strong></div>
+          <div class="recommendation"><span>Recommended fix</span><p>Subscribe to the upload-completion event and render the final state only after the worker confirms processing.</p></div>
+          <button id="applyFix" class="fix-button"><span>⚡</span><span><strong>Apply suggested fix</strong><small>Patch completion-event handling</small></span></button>
+        </div>
+
+        <div class="fix-result hidden" id="fixResult">
+          <span>✓</span><div><strong>Fix applied to demo build</strong><p>Retry the upload to verify the completion event now resolves correctly.</p></div>
+        </div>
+      </section>
+    </div>
+
+    <script src="/northstar.js"></script>
+  </body>
+</html>

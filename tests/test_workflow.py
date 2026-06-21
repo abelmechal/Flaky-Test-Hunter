@@ -49,6 +49,13 @@ class FakePage:
 
 
 class ContractTests(unittest.TestCase):
+    def test_northstar_integrated_demo_assets_exist(self):
+        for name in ("northstar.html", "northstar.css", "northstar.js"):
+            self.assertTrue((ROOT / "ui" / name).is_file())
+        script = (ROOT / "ui" / "northstar.js").read_text(encoding="utf-8")
+        self.assertIn('scenario_id: "upload-progress"', script)
+        self.assertIn("bugFixed = true", script)
+
     def test_demo_ui_fixture_payload(self):
         payload = fixture_payload()
         self.assertEqual(payload["issue"]["id"], "sentry-checkout-001")

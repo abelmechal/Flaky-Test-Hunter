@@ -2,9 +2,12 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
   "rewrites": [
-    { "source": "/", "destination": "/ui/index.html" },
+    { "source": "/", "destination": "/ui/northstar.html" },
     { "source": "/styles.css", "destination": "/ui/styles.css" },
-    { "source": "/app.js", "destination": "/ui/app.js" }
+    { "source": "/app.js", "destination": "/ui/app.js" },
+    { "source": "/northstar.css", "destination": "/ui/northstar.css" },
+    { "source": "/northstar.js", "destination": "/ui/northstar.js" },
+    { "source": "/triage.html", "destination": "/ui/index.html" }
   ],
   "functions": {
     "api/run.py": {
