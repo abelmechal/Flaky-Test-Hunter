@@ -63,6 +63,13 @@ Open `http://127.0.0.1:8080` and click **Run live diagnosis**. The dashboard
 shows the agent handoff, Browserbase failure evidence, mixed execution history,
 and final recommendation in one view.
 
+The test triage queue includes four distinct demo cases:
+
+- Checkout confirmation: mixed outcomes, classified as likely flaky.
+- Login redirect: repeated failures, classified as a likely regression.
+- Search suggestions: verification passes, classified as inconclusive.
+- Upload progress: intermittent completion state, classified as likely flaky.
+
 ### Deploy the Dashboard to Vercel
 
 The repository includes Vercel Python function adapters for `/api/fixture` and

@@ -7,7 +7,7 @@ from unittest.mock import patch
 from app.browserbase_runner import _execute_step
 from app.a2a_contracts import A2AReproRequest, A2AReproResponse
 from app.contracts import ReproPlan, ReproResult
-from app.demo_ui import fixture_payload
+from app.demo_ui import fixture_payload, load_demo_scenarios
 from app.reasoning import classify_failure
 from app.redis_store import SEEDED_HISTORY, RedisStore
 from app.repro_client import (
@@ -53,10 +53,30 @@ class ContractTests(unittest.TestCase):
         payload = fixture_payload()
         self.assertEqual(payload["issue"]["id"], "sentry-checkout-001")
         self.assertEqual(payload["plan"]["step_count"], 4)
+        self.assertEqual(len(payload["scenarios"]), 4)
         self.assertEqual(
             payload["plan"]["steps"][-1]["target"],
             "#order-confirmation",
         )
+
+    def test_demo_scenarios_cover_multiple_diagnoses(self):
+        scenarios = load_demo_scenarios()
+        classifications = {
+            scenario["id"]: classify_failure(
+                scenario["history"]
+                + [
+                    {
+                        "reproduced": scenario["mock_reproduced"],
+                        "timestamp": "2026-06-20T14:00:00Z",
+                    }
+                ]
+            )
+            for scenario in scenarios
+        }
+        self.assertEqual(classifications["checkout-confirmation"], "Likely flaky")
+        self.assertEqual(classifications["login-redirect"], "Likely regression")
+        self.assertEqual(classifications["search-results"], "Inconclusive")
+        self.assertEqual(classifications["upload-progress"], "Likely flaky")
 
     def test_example_contracts_validate(self):
         plan = ReproPlan.model_validate_json(

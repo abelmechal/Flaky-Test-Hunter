@@ -42,6 +42,14 @@
         </button>
       </section>
 
+      <section class="scenario-section">
+        <div class="section-label">
+          <span class="overline">Test triage queue</span>
+          <span>Choose a failure to investigate</span>
+        </div>
+        <div class="scenario-grid" id="scenarioGrid"></div>
+      </section>
+
       <section class="issue-card panel">
         <div class="panel-heading">
           <div>
@@ -60,8 +68,8 @@
           </div>
           <div class="issue-stats">
             <div><strong id="recentRuns">14</strong><span>Recent runs</span></div>
-            <div><strong>4</strong><span>Repro steps</span></div>
-            <div><strong>5s</strong><span>Timeout</span></div>
+            <div><strong id="stepCount">4</strong><span>Repro steps</span></div>
+            <div><strong id="severity">High</strong><span>Severity</span></div>
           </div>
         </div>
       </section>
@@ -115,22 +123,22 @@
               <span class="success-badge" id="verificationBadge">Live session completed</span>
             </div>
             <div class="browser-window">
-              <div class="browser-chrome"><i></i><i></i><i></i><span>checkout.demo / confirmation</span></div>
+              <div class="browser-chrome"><i></i><i></i><i></i><span id="browserPath">checkout.demo / confirmation</span></div>
               <div class="browser-body">
                 <div class="checkout-copy">
-                  <span>CHECKOUT DEMO</span>
-                  <h4>Processing payment…</h4>
-                  <p>The expected confirmation never appeared.</p>
+                  <span id="browserScenario">BROWSER SESSION</span>
+                  <h4 id="browserTitle">Processing payment…</h4>
+                  <p id="browserDetail">The expected confirmation never appeared.</p>
                 </div>
-                <div class="missing-element">
+                <div class="missing-element" id="elementEvidence">
                   <span>Expected element</span>
-                  <code>#order-confirmation</code>
-                  <strong>NOT FOUND</strong>
+                  <code id="expectedElement">#order-confirmation</code>
+                  <strong id="elementStatus">NOT FOUND</strong>
                 </div>
               </div>
             </div>
             <div class="evidence-row">
-              <div><span>Result</span><strong class="red">Failure reproduced</strong></div>
+              <div><span>Result</span><strong class="red" id="resultStatus">Failure reproduced</strong></div>
               <div><span>Failed at</span><strong id="failedStep">Step 4 of 4</strong></div>
               <div><span>Duration</span><strong id="duration">—</strong></div>
               <a id="sessionLink" target="_blank" rel="noreferrer">Open session ↗</a>
@@ -138,7 +146,7 @@
           </article>
 
           <article class="panel history-card">
-            <div class="panel-heading"><span class="overline">Recent execution history</span><span class="mixed-badge">Mixed outcomes</span></div>
+            <div class="panel-heading"><span class="overline">Recent execution history</span><span class="mixed-badge" id="historyBadge">Mixed outcomes</span></div>
             <div class="history-visual" id="historyVisual"></div>
             <div class="history-legend">
               <span><i class="fail"></i><b id="failCount">0</b> Failed</span>
@@ -153,7 +161,7 @@
             <span class="spark">✦</span>
             <span class="overline">Final diagnosis</span>
           </div>
-          <div class="diagnosis-label">LIKELY FLAKY</div>
+          <div class="diagnosis-label" id="diagnosisLabel">LIKELY FLAKY</div>
           <div class="confidence">
             <div><span>Confidence</span><strong id="confidence">92%</strong></div>
             <div class="confidence-track"><span id="confidenceBar"></span></div>
@@ -164,9 +172,9 @@
             <strong id="recommendation">Temporarily quarantine this test and investigate async timing around #order-confirmation.</strong>
           </div>
           <div class="proof-list">
-            <div><i>✓</i><span>Live browser failure reproduced</span></div>
+            <div><i>✓</i><span id="browserProof">Live browser failure reproduced</span></div>
             <div><i>✓</i><span id="delegationProof">Multi-agent delegation verified</span></div>
-            <div><i>✓</i><span>Mixed historical outcomes found</span></div>
+            <div><i>✓</i><span id="historyProof">Mixed historical outcomes found</span></div>
           </div>
           <button class="secondary-button" id="runAgain">Run diagnosis again</button>
         </article>

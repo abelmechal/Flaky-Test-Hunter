@@ -9,21 +9,45 @@ from app.a2a_reproducer_client import query_reproducer_agent
 from app.contracts import ReproResult
 from app.reasoning import classify_failure
 from app.redis_store import RedisStore
-from app.sentry_client import SentryClient
 
 
 ROOT = Path(__file__).resolve().parent.parent
+SCENARIOS_PATH = ROOT / "fixtures" / "demo_scenarios.json"
 
 
-def load_demo_plan() -> dict[str, Any]:
-    return SentryClient().fetch_repro_plan().model_dump(
-        mode="json", exclude_none=True
-    )
+def load_demo_scenarios() -> list[dict[str, Any]]:
+    return json.loads(SCENARIOS_PATH.read_text(encoding="utf-8"))
+
+
+def get_demo_scenario(scenario_id: str | None = None) -> dict[str, Any]:
+    scenarios = load_demo_scenarios()
+    selected_id = scenario_id or scenarios[0]["id"]
+    for scenario in scenarios:
+        if scenario["id"] == selected_id:
+            return scenario
+    raise ValueError(f"Unknown demo scenario: {selected_id}")
+
+
+def load_demo_plan(scenario_id: str | None = None) -> dict[str, Any]:
+    return get_demo_scenario(scenario_id)["plan"]
 
 
 def fixture_payload() -> dict[str, Any]:
-    plan = load_demo_plan()
+    scenarios = load_demo_scenarios()
+    scenario = scenarios[0]
+    plan = scenario["plan"]
     return {
+        "selected_id": scenario["id"],
+        "scenarios": [
+            {
+                "id": item["id"],
+                "label": item["label"],
+                "suite": item["suite"],
+                "severity": item["severity"],
+                "issue": item["plan"],
+            }
+            for item in scenarios
+        ],
         "issue": {
             "id": plan["issue_id"],
             "test_name": plan["test_name"],
@@ -38,17 +62,33 @@ def fixture_payload() -> dict[str, Any]:
     }
 
 
-async def run_demo_diagnosis() -> dict[str, Any]:
-    plan = load_demo_plan()
+async def run_demo_diagnosis(scenario_id: str | None = None) -> dict[str, Any]:
+    scenario = get_demo_scenario(scenario_id)
+    plan = scenario["plan"]
     started_at = datetime.now(timezone.utc)
     result_data = await query_reproducer_agent(
         plan,
         conversation_id=f"ui-demo-{started_at.strftime('%Y%m%d%H%M%S')}",
     )
+    if result_data.get("_a2a_fallback") and not result_data.get(
+        "browserbase_session_url"
+    ):
+        result_data["reproduced"] = bool(scenario["mock_reproduced"])
+        result_data["error_observed"] = (
+            f"TimeoutError: {scenario['expected_element']} not found"
+            if scenario["mock_reproduced"]
+            else None
+        )
+        result_data["notes"] = (
+            f"Failed while waiting for {scenario['expected_element']}"
+            if scenario["mock_reproduced"]
+            else "Verification completed without reproducing the reported failure."
+        )
     result = ReproResult.model_validate(result_data)
 
     store = RedisStore()
-    store.seed_history(plan["issue_id"])
+    if not store.get_history(plan["issue_id"]):
+        store.save_history(plan["issue_id"], scenario["history"])
     store.record_result(plan["issue_id"], result.reproduced)
     history = store.get_history(plan["issue_id"])
     classification = classify_failure(history)
@@ -77,6 +117,7 @@ async def run_demo_diagnosis() -> dict[str, Any]:
 
     return {
         "status": "completed",
+        "scenario_id": scenario["id"],
         "run": {
             "source": source,
             "delegated": delegated,
@@ -99,6 +140,9 @@ async def run_demo_diagnosis() -> dict[str, Any]:
             "notes": result.notes,
             "session_url": session_url,
             "screenshot_url": screenshot_url,
+            "expected_element": scenario["expected_element"],
+            "browser_title": scenario["browser_title"],
+            "browser_detail": scenario["browser_detail"],
         },
         "history": {
             "items": history,
@@ -107,14 +151,27 @@ async def run_demo_diagnosis() -> dict[str, Any]:
         },
         "diagnosis": {
             "classification": classification,
-            "confidence": 92 if classification == "Likely flaky" else 68,
-            "conclusion": (
-                "The same test has both passing and failing outcomes across "
-                "recent runs, so this is intermittent rather than deterministic."
-            ),
-            "recommendation": (
-                "Temporarily quarantine this test and investigate async timing "
-                "around #order-confirmation."
-            ),
+            "confidence": scenario["confidence"],
+            "conclusion": _conclusion_for(classification, result.reproduced),
+            "recommendation": scenario["recommendation"],
         },
     }
+
+
+def _conclusion_for(classification: str, reproduced: bool) -> str:
+    if classification == "Likely flaky":
+        return (
+            "The same test has both passing and failing outcomes across recent "
+            "runs, so this is intermittent rather than deterministic."
+        )
+    if classification == "Likely regression":
+        return (
+            "The failure reproduced consistently across every recent run, "
+            "which strongly indicates a deterministic regression."
+        )
+    if not reproduced:
+        return (
+            "Browser verification passed and recent runs are stable. There is "
+            "not enough evidence to classify the original report as flaky."
+        )
+    return "The available evidence is insufficient for a confident classification."

@@ -30,7 +30,16 @@ class handler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:
         try:
-            self._json(asyncio.run(run_demo_diagnosis()), 200)
+            content_length = int(self.headers.get("Content-Length", "0"))
+            payload = (
+                json.loads(self.rfile.read(content_length))
+                if content_length
+                else {}
+            )
+            self._json(
+                asyncio.run(run_demo_diagnosis(payload.get("scenario_id"))),
+                200,
+            )
         except Exception as exc:
             self._json(
                 {

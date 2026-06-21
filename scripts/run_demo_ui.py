@@ -79,7 +79,15 @@ class DemoHandler(BaseHTTPRequestHandler):
             self.send_error(404)
             return
         try:
-            self._json(asyncio.run(run_demo_diagnosis()))
+            content_length = int(self.headers.get("Content-Length", "0"))
+            payload = (
+                json.loads(self.rfile.read(content_length))
+                if content_length
+                else {}
+            )
+            self._json(
+                asyncio.run(run_demo_diagnosis(payload.get("scenario_id")))
+            )
         except Exception as exc:
             self._json(
                 {
