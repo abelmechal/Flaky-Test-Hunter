@@ -18,9 +18,9 @@
     "plan": {
       "issue_id": "sentry-checkout-001",
       "test_name": "checkout_flow.spec.ts > completes purchase",
-      "url": "https://flaky-test-hunter.vercel.app/demo-app/checkout.html",
+      "url": "data:text/html,<html><body><h1>Checkout Demo</h1><input id=\"email\" placeholder=\"email\"/><button id=\"submit-payment\" onclick=\"document.body.insertAdjacentHTML('beforeend','<p id=processing>Processing payment...</p>')\">Submit payment</button></body></html>",
       "steps": [
-        {"action": "goto", "target": "https://flaky-test-hunter.vercel.app/demo-app/checkout.html"},
+        {"action": "goto", "target": "data:text/html,<html><body><h1>Checkout Demo</h1><input id=\"email\" placeholder=\"email\"/><button id=\"submit-payment\" onclick=\"document.body.insertAdjacentHTML('beforeend','<p id=processing>Processing payment...</p>')\">Submit payment</button></body></html>"},
         {"action": "fill", "target": "#email", "value": "test@example.com"},
         {"action": "click", "target": "#submit-payment"},
         {"action": "wait_for_selector", "target": "#order-confirmation", "timeout_ms": 5000}
@@ -50,9 +50,9 @@
     "plan": {
       "issue_id": "sentry-auth-002",
       "test_name": "auth_flow.spec.ts > redirects after login",
-      "url": "https://flaky-test-hunter.vercel.app/demo-app/login.html",
+      "url": "data:text/html,<html><body><h1>Welcome back</h1><input id=\"username\"/><button id=\"login\" onclick=\"document.body.insertAdjacentHTML('beforeend','<p id=signing-in>Signing you in...</p>')\">Sign in</button></body></html>",
       "steps": [
-        {"action": "goto", "target": "https://flaky-test-hunter.vercel.app/demo-app/login.html"},
+        {"action": "goto", "target": "data:text/html,<html><body><h1>Welcome back</h1><input id=\"username\"/><button id=\"login\" onclick=\"document.body.insertAdjacentHTML('beforeend','<p id=signing-in>Signing you in...</p>')\">Sign in</button></body></html>"},
         {"action": "fill", "target": "#username", "value": "demo@example.com"},
         {"action": "click", "target": "#login"},
         {"action": "wait_for_selector", "target": "#dashboard-shell", "timeout_ms": 5000}
@@ -81,9 +81,9 @@
     "plan": {
       "issue_id": "sentry-search-003",
       "test_name": "search_flow.spec.ts > displays suggestions",
-      "url": "https://flaky-test-hunter.vercel.app/demo-app/search.html",
+      "url": "data:text/html,<html><body><h1>Search</h1><input id=\"query\"/><button id=\"search\" onclick=\"document.body.insertAdjacentHTML('beforeend','<section id=search-results>3 results found</section>')\">Search</button></body></html>",
       "steps": [
-        {"action": "goto", "target": "https://flaky-test-hunter.vercel.app/demo-app/search.html"},
+        {"action": "goto", "target": "data:text/html,<html><body><h1>Search</h1><input id=\"query\"/><button id=\"search\" onclick=\"document.body.insertAdjacentHTML('beforeend','<section id=search-results>3 results found</section>')\">Search</button></body></html>"},
         {"action": "fill", "target": "#query", "value": "wireless keyboard"},
         {"action": "click", "target": "#search"},
         {"action": "wait_for_selector", "target": "#search-results", "timeout_ms": 5000}
@@ -113,9 +113,9 @@
     "plan": {
       "issue_id": "sentry-upload-004",
       "test_name": "media_upload.spec.ts > shows completion state",
-      "url": "https://flaky-test-hunter.vercel.app/demo-app/upload.html",
+      "url": "data:text/html,<html><body><h1>Asset uploader</h1><input id=\"filename\"/><button id=\"upload\" onclick=\"document.body.insertAdjacentHTML('beforeend','<p id=uploading>Uploading asset...</p>')\">Upload</button></body></html>",
       "steps": [
-        {"action": "goto", "target": "https://flaky-test-hunter.vercel.app/demo-app/upload.html"},
+        {"action": "goto", "target": "data:text/html,<html><body><h1>Asset uploader</h1><input id=\"filename\"/><button id=\"upload\" onclick=\"document.body.insertAdjacentHTML('beforeend','<p id=uploading>Uploading asset...</p>')\">Upload</button></body></html>"},
         {"action": "fill", "target": "#filename", "value": "product-demo.mp4"},
         {"action": "click", "target": "#upload"},
         {"action": "wait_for_selector", "target": "#upload-complete", "timeout_ms": 5000}
