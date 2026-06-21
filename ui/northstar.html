@@ -8,15 +8,17 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/northstar.css" />
+    <link rel="stylesheet" href="/northstar-extra.css" />
   </head>
   <body>
     <aside class="sidebar">
       <div class="brand"><span class="brand-mark"></span><strong>Northstar</strong></div>
       <nav>
-        <button><span>⌂</span>Overview</button>
-        <button><span>▧</span>Media library</button>
-        <button class="active"><span>↑</span>Upload asset</button>
-        <button><span>◇</span>Collections</button>
+        <div class="nav-label">Flaky scenarios</div>
+        <button class="scenario-nav active" data-scenario="upload-progress"><span>↑</span>Upload progress</button>
+        <button class="scenario-nav" data-scenario="checkout-confirmation"><span>▣</span>Checkout confirmation</button>
+        <button class="scenario-nav" data-scenario="login-redirect"><span>→</span>Login redirect</button>
+        <button class="scenario-nav" data-scenario="search-results"><span>⌕</span>Search suggestions</button>
       </nav>
       <div class="diagnosis-nav">
         <div class="nav-label">Developer tools</div>
@@ -32,24 +34,24 @@
 
     <main>
       <header>
-        <div><span>Media</span><b>/</b><strong>New asset</strong></div>
+        <div><span id="breadcrumbSection">Media</span><b>/</b><strong id="breadcrumbPage">New asset</strong></div>
         <div class="header-right"><span class="system-online"><i></i>Systems online</span><span class="avatar">AM</span></div>
       </header>
 
       <section class="workspace">
         <div class="page-title">
-          <div><span class="eyebrow">Media pipeline</span><h1>Upload a new asset</h1><p>Files are processed and optimized automatically.</p></div>
+          <div><span class="eyebrow" id="scenarioEyebrow">Media pipeline</span><h1 id="scenarioTitle">Upload a new asset</h1><p id="scenarioLead">Files are processed and optimized automatically.</p></div>
           <span class="build-pill" id="buildPill">Buggy build</span>
         </div>
 
         <article class="upload-card">
           <div class="upload-grid">
-            <label>File name<input id="filename" value="product-demo.mp4" /></label>
-            <label>Collection<input value="Product launches" /></label>
+            <label><span id="fieldOneLabel">File name</span><input id="fieldOne" value="product-demo.mp4" /></label>
+            <label><span id="fieldTwoLabel">Collection</span><input id="fieldTwo" value="Product launches" /></label>
           </div>
           <div class="drop-zone">
-            <div class="file-icon">MP4</div>
-            <div><strong>product-demo.mp4</strong><span>128.4 MB · H.264 video</span></div>
+            <div class="file-icon" id="itemIcon">MP4</div>
+            <div><strong id="itemTitle">product-demo.mp4</strong><span id="itemDetail">128.4 MB · H.264 video</span></div>
             <span class="ready">Ready</span>
           </div>
           <button id="uploadButton" class="primary-button">Start upload</button>
@@ -62,12 +64,12 @@
 
           <div class="error-state hidden" id="errorState">
             <span class="error-icon">!</span>
-            <div><strong>Upload stalled at 82%</strong><p>The completion event was never received from the media worker.</p></div>
+            <div><strong id="visibleErrorTitle">Upload stalled at 82%</strong><p id="visibleErrorDetail">The completion event was never received from the media worker.</p></div>
             <button id="errorDiagnose">Diagnose failure</button>
           </div>
 
           <div class="success-state hidden" id="successState">
-            <span>✓</span><div><strong id="upload-complete">Upload complete</strong><p>product-demo.mp4 is ready in Product launches.</p></div>
+            <span>✓</span><div><strong id="upload-complete">Upload complete</strong><p id="successDetail">product-demo.mp4 is ready in Product launches.</p></div>
           </div>
         </article>
 
@@ -97,13 +99,14 @@
         <div class="report hidden" id="report">
           <div class="report-top"><span>Final diagnosis</span><strong id="classification">LIKELY FLAKY</strong><b id="confidence">89% confidence</b></div>
           <div class="evidence">
-            <div><span>Observed error</span><code>Upload completion state not visible within 5000ms</code></div>
+            <div><span>Observed error</span><code id="observedError">Upload completion state not visible within 5000ms</code></div>
             <div><span>Browser verification</span><strong id="browserEvidence">Failure reproduced at step 4 of 4</strong></div>
             <div><span>History</span><strong>Mixed pass/fail outcomes across recent runs</strong></div>
           </div>
-          <div class="root-cause"><span>Probable root cause</span><strong>Race condition: the test waits on a UI timeout instead of the media worker's completion event.</strong></div>
-          <div class="recommendation"><span>Recommended fix</span><p>Subscribe to the upload-completion event and render the final state only after the worker confirms processing.</p></div>
+          <div class="root-cause"><span>Probable root cause</span><strong id="rootCause">Race condition: the test waits on a UI timeout instead of the media worker's completion event.</strong></div>
+          <div class="recommendation"><span>Recommended fix</span><p id="recommendedFix">Subscribe to the upload-completion event and render the final state only after the worker confirms processing.</p></div>
           <button id="applyFix" class="fix-button"><span>⚡</span><span><strong>Apply suggested fix</strong><small>Patch completion-event handling</small></span></button>
+          <div class="command-console hidden" id="commandConsole"><div><span></span><span></span><span></span><b>Remediation runner</b></div><pre id="commandOutput"></pre></div>
         </div>
 
         <div class="fix-result hidden" id="fixResult">
@@ -112,6 +115,6 @@
       </section>
     </div>
 
-    <script src="/northstar.js"></script>
+    <script src="/northstar-v2.js"></script>
   </body>
 </html>

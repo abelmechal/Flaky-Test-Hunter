@@ -6,7 +6,9 @@
     { "source": "/styles.css", "destination": "/ui/styles.css" },
     { "source": "/app.js", "destination": "/ui/app.js" },
     { "source": "/northstar.css", "destination": "/ui/northstar.css" },
+    { "source": "/northstar-extra.css", "destination": "/ui/northstar-extra.css" },
     { "source": "/northstar.js", "destination": "/ui/northstar.js" },
+    { "source": "/northstar-v2.js", "destination": "/ui/northstar-v2.js" },
     { "source": "/triage.html", "destination": "/ui/index.html" }
   ],
   "functions": {

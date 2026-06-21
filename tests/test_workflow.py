@@ -8,6 +8,7 @@ from app.browserbase_runner import _execute_step
 from app.a2a_contracts import A2AReproRequest, A2AReproResponse
 from app.contracts import ReproPlan, ReproResult
 from app.demo_ui import fixture_payload, load_demo_scenarios
+from app.fix_workflow import execute_fix
 from app.reasoning import classify_failure
 from app.redis_store import SEEDED_HISTORY, RedisStore
 from app.repro_client import (
@@ -55,6 +56,18 @@ class ContractTests(unittest.TestCase):
         script = (ROOT / "ui" / "northstar.js").read_text(encoding="utf-8")
         self.assertIn('scenario_id: "upload-progress"', script)
         self.assertIn("bugFixed = true", script)
+
+    def test_all_demo_fixes_execute_and_verify(self):
+        for scenario_id in (
+            "upload-progress",
+            "checkout-confirmation",
+            "login-redirect",
+            "search-results",
+        ):
+            result = execute_fix(scenario_id)
+            self.assertTrue(result["verified"])
+            self.assertEqual(result["status"], "verified")
+            self.assertEqual(len(result["commands"]), 3)
 
     def test_demo_ui_fixture_payload(self):
         payload = fixture_payload()

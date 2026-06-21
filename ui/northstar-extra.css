@@ -1,0 +1,29 @@
+.command-console {
+  margin-top: 15px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 10px;
+  background: #06140f;
+}
+.command-console > div {
+  height: 31px;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #0f2b21;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.command-console > div span { width: 7px; height: 7px; border-radius: 50%; background: #de5661; }
+.command-console > div span:nth-child(2) { background: #eea43b; }
+.command-console > div span:nth-child(3) { background: #29c786; }
+.command-console > div b { margin-left: 6px; color: #718d81; font: 8px "DM Mono"; }
+.command-console pre {
+  min-height: 94px;
+  margin: 0;
+  padding: 13px;
+  color: #91e7bb;
+  font: 9px/1.7 "DM Mono";
+  white-space: pre-wrap;
+}
+.scenario-nav.active { border: 1px solid rgba(121,237,184,.18); }

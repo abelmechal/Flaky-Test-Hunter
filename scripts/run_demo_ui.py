@@ -17,6 +17,7 @@ if str(ROOT) not in sys.path:
 from dotenv import load_dotenv
 
 from app.demo_ui import fixture_payload, run_demo_diagnosis
+from app.fix_workflow import execute_fix
 
 
 UI_DIR = ROOT / "ui"
@@ -78,7 +79,8 @@ class DemoHandler(BaseHTTPRequestHandler):
         self._file(candidate)
 
     def do_POST(self) -> None:
-        if urlparse(self.path).path != "/api/run":
+        route = urlparse(self.path).path
+        if route not in {"/api/run", "/api/fix"}:
             self.send_error(404)
             return
         try:
@@ -88,9 +90,12 @@ class DemoHandler(BaseHTTPRequestHandler):
                 if content_length
                 else {}
             )
-            self._json(
-                asyncio.run(run_demo_diagnosis(payload.get("scenario_id")))
-            )
+            if route == "/api/fix":
+                self._json(execute_fix(payload.get("scenario_id", "")))
+            else:
+                self._json(
+                    asyncio.run(run_demo_diagnosis(payload.get("scenario_id")))
+                )
         except Exception as exc:
             self._json(
                 {
