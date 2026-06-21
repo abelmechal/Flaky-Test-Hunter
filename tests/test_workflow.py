@@ -61,6 +61,14 @@ class ContractTests(unittest.TestCase):
 
     def test_demo_scenarios_cover_multiple_diagnoses(self):
         scenarios = load_demo_scenarios()
+        self.assertTrue(
+            all(
+                scenario["plan"]["url"].startswith(
+                    "https://flaky-test-hunter.vercel.app/demo-app/"
+                )
+                for scenario in scenarios
+            )
+        )
         classifications = {
             scenario["id"]: classify_failure(
                 scenario["history"]

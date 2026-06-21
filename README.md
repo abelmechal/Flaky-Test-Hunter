@@ -70,6 +70,12 @@ The test triage queue includes four distinct demo cases:
 - Search suggestions: verification passes, classified as inconclusive.
 - Upload progress: intermittent completion state, classified as likely flaky.
 
+Each Repro Plan now opens a full hosted demo application instead of a
+`data:text/html` fixture. Browserbase session playback records visible form
+entry, button interaction, loading states, and the final UI error. The
+dashboard exposes the session link as **Watch Browserbase recording** whenever
+a live Browserbase run is available.
+
 ### Deploy the Dashboard to Vercel
 
 The repository includes Vercel Python function adapters for `/api/fixture` and

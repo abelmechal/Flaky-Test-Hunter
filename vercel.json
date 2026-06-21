@@ -4,7 +4,8 @@
   "rewrites": [
     { "source": "/", "destination": "/ui/index.html" },
     { "source": "/styles.css", "destination": "/ui/styles.css" },
-    { "source": "/app.js", "destination": "/ui/app.js" }
+    { "source": "/app.js", "destination": "/ui/app.js" },
+    { "source": "/demo-app/:path*", "destination": "/ui/demo-app/:path*" }
   ],
   "functions": {
     "api/run.py": {
