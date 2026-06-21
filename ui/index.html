@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>Flaky-Test Hunter</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="ambient ambient-one"></div>
+    <div class="ambient ambient-two"></div>
+
+    <header class="topbar">
+      <a class="brand" href="/">
+        <span class="brand-mark"><span></span></span>
+        <span>Flaky-Test Hunter</span>
+      </a>
+      <div class="topbar-right">
+        <span class="system-status"><i></i> Systems ready</span>
+        <span class="mode-pill">Multi-agent mode</span>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div>
+          <div class="eyebrow">Autonomous test intelligence</div>
+          <h1>Find the signal<br />inside the <em>noise.</em></h1>
+          <p>Turn a Sentry failure into browser evidence, historical context, and a confident diagnosis—automatically.</p>
+        </div>
+        <button class="run-button" id="runButton">
+          <span class="run-icon">▶</span>
+          <span>
+            <strong>Run live diagnosis</strong>
+            <small>Delegate to Browserbase agent</small>
+          </span>
+          <span class="shortcut">⌘ ↵</span>
+        </button>
+      </section>
+
+      <section class="issue-card panel">
+        <div class="panel-heading">
+          <div>
+            <span class="source-badge sentry">S</span>
+            <span class="overline">Incoming signal · Sentry</span>
+          </div>
+          <span class="issue-id" id="issueId">Loading issue…</span>
+        </div>
+        <div class="issue-grid">
+          <div>
+            <h2 id="testName">checkout_flow.spec.ts › completes purchase</h2>
+            <div class="error-line">
+              <span class="error-icon">!</span>
+              <code id="expectedFailure">Element #order-confirmation not visible within 5000ms</code>
+            </div>
+          </div>
+          <div class="issue-stats">
+            <div><strong id="recentRuns">14</strong><span>Recent runs</span></div>
+            <div><strong>4</strong><span>Repro steps</span></div>
+            <div><strong>5s</strong><span>Timeout</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="agent-flow">
+        <article class="agent-card">
+          <div class="agent-head">
+            <span class="agent-avatar diagnose">D</span>
+            <div><span class="overline">Agent 01</span><h3>Diagnostician</h3></div>
+            <span class="agent-state" id="diagnosticianState">Ready</span>
+          </div>
+          <p>Parses the Sentry issue, reviews history, and determines flaky vs. regression.</p>
+          <div class="agent-task"><i></i><span>Waiting for diagnosis request</span></div>
+        </article>
+
+        <div class="handoff">
+          <span></span><b>Repro plan</b><span></span>
+        </div>
+
+        <article class="agent-card">
+          <div class="agent-head">
+            <span class="agent-avatar reproduce">R</span>
+            <div><span class="overline">Agent 02</span><h3>Reproducer</h3></div>
+            <span class="agent-state" id="reproducerState">Ready</span>
+          </div>
+          <p>Executes the frozen browser plan in a live Browserbase cloud session.</p>
+          <div class="agent-task"><i></i><span>Waiting for delegated plan</span></div>
+        </article>
+      </section>
+
+      <section class="progress-panel panel" id="progressPanel">
+        <div class="progress-title">
+          <div><span class="pulse"></span><strong id="progressTitle">Ready to investigate</strong></div>
+          <span id="progressTime">00:00</span>
+        </div>
+        <div class="progress-track"><span id="progressBar"></span></div>
+        <div class="progress-steps">
+          <span class="active">Ingest issue</span>
+          <span>Build plan</span>
+          <span>Run browser</span>
+          <span>Analyze history</span>
+          <span>Diagnose</span>
+        </div>
+      </section>
+
+      <section class="results hidden" id="results">
+        <div class="result-column">
+          <article class="panel browser-card">
+            <div class="panel-heading">
+              <div><span class="source-badge browserbase">B</span><span class="overline">Browser verification</span></div>
+              <span class="success-badge" id="verificationBadge">Live session completed</span>
+            </div>
+            <div class="browser-window">
+              <div class="browser-chrome"><i></i><i></i><i></i><span>checkout.demo / confirmation</span></div>
+              <div class="browser-body">
+                <div class="checkout-copy">
+                  <span>CHECKOUT DEMO</span>
+                  <h4>Processing payment…</h4>
+                  <p>The expected confirmation never appeared.</p>
+                </div>
+                <div class="missing-element">
+                  <span>Expected element</span>
+                  <code>#order-confirmation</code>
+                  <strong>NOT FOUND</strong>
+                </div>
+              </div>
+            </div>
+            <div class="evidence-row">
+              <div><span>Result</span><strong class="red">Failure reproduced</strong></div>
+              <div><span>Failed at</span><strong id="failedStep">Step 4 of 4</strong></div>
+              <div><span>Duration</span><strong id="duration">—</strong></div>
+              <a id="sessionLink" target="_blank" rel="noreferrer">Open session ↗</a>
+            </div>
+          </article>
+
+          <article class="panel history-card">
+            <div class="panel-heading"><span class="overline">Recent execution history</span><span class="mixed-badge">Mixed outcomes</span></div>
+            <div class="history-visual" id="historyVisual"></div>
+            <div class="history-legend">
+              <span><i class="fail"></i><b id="failCount">0</b> Failed</span>
+              <span><i class="pass"></i><b id="passCount">0</b> Passed</span>
+              <span class="history-note">Same test. Different outcomes.</span>
+            </div>
+          </article>
+        </div>
+
+        <article class="diagnosis-card panel">
+          <div class="diagnosis-top">
+            <span class="spark">✦</span>
+            <span class="overline">Final diagnosis</span>
+          </div>
+          <div class="diagnosis-label">LIKELY FLAKY</div>
+          <div class="confidence">
+            <div><span>Confidence</span><strong id="confidence">92%</strong></div>
+            <div class="confidence-track"><span id="confidenceBar"></span></div>
+          </div>
+          <p id="conclusion">The same test has both passing and failing outcomes across recent runs, so this is intermittent rather than deterministic.</p>
+          <div class="recommendation">
+            <span>Recommended action</span>
+            <strong id="recommendation">Temporarily quarantine this test and investigate async timing around #order-confirmation.</strong>
+          </div>
+          <div class="proof-list">
+            <div><i>✓</i><span>Live browser failure reproduced</span></div>
+            <div><i>✓</i><span id="delegationProof">Multi-agent delegation verified</span></div>
+            <div><i>✓</i><span>Mixed historical outcomes found</span></div>
+          </div>
+          <button class="secondary-button" id="runAgain">Run diagnosis again</button>
+        </article>
+      </section>
+
+      <div class="error-toast hidden" id="errorToast"></div>
+    </main>
+
+    <footer><span>Flaky-Test Hunter</span><span>ASI:One · uAgents · Browserbase · Sentry</span><span>Demo build 1.0</span></footer>
+    <script src="/app.js"></script>
+  </body>
+</html>

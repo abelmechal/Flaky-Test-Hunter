@@ -7,6 +7,7 @@ from unittest.mock import patch
 from app.browserbase_runner import _execute_step
 from app.a2a_contracts import A2AReproRequest, A2AReproResponse
 from app.contracts import ReproPlan, ReproResult
+from app.demo_ui import fixture_payload
 from app.reasoning import classify_failure
 from app.redis_store import SEEDED_HISTORY, RedisStore
 from app.repro_client import (
@@ -48,6 +49,15 @@ class FakePage:
 
 
 class ContractTests(unittest.TestCase):
+    def test_demo_ui_fixture_payload(self):
+        payload = fixture_payload()
+        self.assertEqual(payload["issue"]["id"], "sentry-checkout-001")
+        self.assertEqual(payload["plan"]["step_count"], 4)
+        self.assertEqual(
+            payload["plan"]["steps"][-1]["target"],
+            "#order-confirmation",
+        )
+
     def test_example_contracts_validate(self):
         plan = ReproPlan.model_validate_json(
             (ROOT / "contracts" / "repro_plan.example.json").read_text(

@@ -47,6 +47,44 @@ python agent.py
 
 The full diagnosis is produced with one command.
 
+### Visual Demo UI
+
+For the judge-facing dashboard, keep the Reproducer Agent running and launch:
+
+```powershell
+$env:MULTI_AGENT_MODE = "true"
+$env:REPRO_MODE = "browserbase"
+$env:REPRODUCER_AGENT_ADDRESS = "agent1..."
+$env:REPRODUCER_AGENT_ENDPOINT = "http://127.0.0.1:8002/submit"
+python scripts/run_demo_ui.py
+```
+
+Open `http://127.0.0.1:8080` and click **Run live diagnosis**. The dashboard
+shows the agent handoff, Browserbase failure evidence, mixed execution history,
+and final recommendation in one view.
+
+### Deploy the Dashboard to Vercel
+
+The repository includes Vercel Python function adapters for `/api/fixture` and
+`/api/run`, plus static rewrites for the dashboard.
+
+Set these Vercel environment variables:
+
+```text
+REPRO_MODE=browserbase
+REPRO_FALLBACK_TO_MOCK=true
+BROWSERBASE_API_KEY=<secret>
+BROWSERBASE_PROJECT_ID=<optional>
+MULTI_AGENT_MODE=true
+REPRODUCER_AGENT_ADDRESS=<hosted agent address>
+REPRODUCER_AGENT_ENDPOINT=<public https endpoint>
+```
+
+`REPRODUCER_AGENT_ENDPOINT` must be publicly reachable. A deployed Vercel
+function cannot call an agent at `127.0.0.1`. If no hosted Reproducer endpoint
+is configured, the Vercel function can execute Browserbase through the
+serverless Reproducer fallback and labels that path explicitly in the UI.
+
 PowerShell:
 
 ```powershell
